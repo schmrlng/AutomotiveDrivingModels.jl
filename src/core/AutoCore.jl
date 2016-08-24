@@ -66,6 +66,7 @@ export
     # vehicles
     Frenet,
     VehicleState,
+    VehicleControls,
     Vehicle,
     AgentClass,
     VehicleDef,

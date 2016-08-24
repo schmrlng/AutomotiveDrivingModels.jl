@@ -1,3 +1,9 @@
+immutable VehicleControls
+    δ::Float64 # commanded curvature
+    a::Float64 # commanded longitudinal acceleration
+end
+VehicleControls() = VehicleControls(0., 0.)
+
 immutable Frenet
     roadind::RoadIndex
     s::Float64 # distance along lane
@@ -42,14 +48,15 @@ end
 
 immutable VehicleState
     posG::VecSE2 # global
-    posF::Frenet # lane-relative frame
+    posF::Frenet # lane-relative frame    
     v::Float64
+    u::VehicleControls
 
-    VehicleState() = new(VecSE2(), NULL_FRENET, NaN)
-    VehicleState(posG::VecSE2, v::Float64) = new(posG, NULL_FRENET, v)
-    VehicleState(posG::VecSE2, posF::Frenet, v::Float64) = new(posG, posF, v)
-    VehicleState(posG::VecSE2, roadway::Roadway, v::Float64) = new(posG, Frenet(posG, roadway), v)
-    VehicleState(posF::Frenet, roadway::Roadway, v::Float64) = new(get_posG(posF, roadway), posF, v)
+    VehicleState() = new(VecSE2(), NULL_FRENET, NaN, VehicleControls())
+    VehicleState(posG::VecSE2, v::Float64, vu::VehicleControls=VehicleControls()) = new(posG, NULL_FRENET, v, vu)
+    VehicleState(posG::VecSE2, posF::Frenet, v::Float64, vu::VehicleControls=VehicleControls()) = new(posG, posF, v, vu)
+    VehicleState(posG::VecSE2, roadway::Roadway, v::Float64, vu::VehicleControls=VehicleControls()) = new(posG, Frenet(posG, roadway), v, vu)
+    VehicleState(posF::Frenet, roadway::Roadway, v::Float64, vu::VehicleControls=VehicleControls()) = new(get_posG(posF, roadway), posF, v, vu)
 end
 Base.show(io::IO, s::VehicleState) = print(io, "VehicleState(", s.posG, ", ", s.posF, ", ", @sprintf("%.3f", s.v), ")")
 function Vec.lerp(a::VehicleState, b::VehicleState, t::Float64, roadway::Roadway)
